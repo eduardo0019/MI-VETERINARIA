@@ -1,0 +1,43 @@
+<div class="layout-container d-flex">
+  <!-- BARRA LATERAL IZQUIERDA -->
+  <aside class="sidebar d-flex flex-column p-3 text-white">
+    <div class="brand-section mb-4 px-2">
+      <h3 class="fw-bold m-0 brand-title">PetHealth</h3>
+      <small class="text-white-50">Veterinaria</small>
+    </div>
+
+    <ul class="nav nav-pills flex-column mb-auto gap-2">
+      <li class="nav-item">
+        <a routerLink="/inicio" routerLinkActive="active-menu" class="nav-link text-white fw-semibold">
+          Inicio
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/mascotas" routerLinkActive="active-menu" class="nav-link text-white fw-semibold">
+          Registrar Mascotas
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/citas" routerLinkActive="active-menu" class="nav-link text-white fw-semibold">
+          Agendar Citas
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/historial" routerLinkActive="active-menu" class="nav-link text-white fw-semibold">
+          Historial Medico
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL DERECHO -->
+  <main class="main-content flex-grow-1 p-4">
+    <!-- Icono de usuario superior derecho -->
+    <div class="d-flex justify-content-end mb-2">
+      <i class="bi bi-person-circle fs-3 text-secondary"></i>
+    </div>
+
+    <!-- Enrutador dinámico -->
+    <router-outlet></router-outlet>
+  </main>
+</div>

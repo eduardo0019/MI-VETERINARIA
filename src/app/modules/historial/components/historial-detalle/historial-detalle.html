@@ -1,0 +1,194 @@
+<div class="container-fluid p-0">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">
+        <i class="bi bi-clipboard2-pulse text-primary me-2"></i>Historial Médico y Consultas
+      </h2>
+      <p class="text-secondary mb-0">Revisa la ficha clínica completa y los registros de atención por paciente.</p>
+    </div>
+
+    <!-- SELECTOR DE MASCOTA -->
+    <div class="col-md-4">
+      <label class="form-label fw-semibold text-secondary small">Seleccionar Paciente:</label>
+      <select 
+        class="form-select border-primary shadow-sm" 
+        [(ngModel)]="mascotaSeleccionadaId" 
+        (change)="onMascotaChange()">
+        <option value="" disabled>Seleccione una mascota...</option>
+        <option *ngFor="let m of mascotas" [value]="m.id">
+          {{ m.nombre }} ({{ m.especie }} - {{ m.raza }})
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="mascotaActual; else noSeleccion">
+    <div class="row g-4">
+      
+      <!-- FICHA DEL PACIENTE Y DATOS DEL DUEÑO -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-header bg-primary text-white py-3 rounded-top-4">
+            <h5 class="card-title m-0 fw-bold">
+              <i class="bi bi-info-circle me-2"></i>Ficha del Paciente
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="text-center mb-3">
+              <div class="avatar-pet mx-auto mb-2 bg-light text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm">
+                <i class="bi bi-heart-pulse fs-1"></i>
+              </div>
+              <h4 class="fw-bold m-0 text-dark">{{ mascotaActual.nombre }}</h4>
+              <span class="badge bg-info text-dark">{{ mascotaActual.especie }}</span>
+            </div>
+
+            <ul class="list-group list-group-flush small">
+              <li class="list-group-item d-flex justify-content-between px-0">
+                <span class="text-secondary">Raza:</span>
+                <span class="fw-semibold text-dark">{{ mascotaActual.raza }}</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between px-0">
+                <span class="text-secondary">Edad calculada:</span>
+                <span class="fw-semibold text-dark">{{ mascotaActual.calcularEdad() }} años</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between px-0">
+                <span class="text-secondary">Fecha de Nacimiento:</span>
+                <span class="fw-semibold text-dark">{{ mascotaActual.fechaNacimiento | date:'dd/MM/yyyy' }}</span>
+              </li>
+            </ul>
+
+            <hr class="text-secondary opacity-25">
+
+            <!-- DATOS DEL PROPIETARIO -->
+            <h6 class="fw-bold text-dark mb-2">
+              <i class="bi bi-person-badge me-2 text-primary"></i>Datos del Propietario
+            </h6>
+            
+            <div *ngIf="duenoActual; else sinDueno" class="p-3 bg-light rounded-3 small border">
+  <p class="mb-1 text-dark fw-bold">
+    {{ $any(duenoActual).nombre || $any(duenoActual).nombreCompleto || 'Sin nombre' }} (DNI: {{ duenoActual.dni }})
+  </p>
+  <p class="mb-1 text-secondary" *ngIf="duenoActual.telefono">
+    <i class="bi bi-telephone me-1"></i>Tel: {{ duenoActual.telefono }}
+  </p>
+  <p class="mb-1 text-secondary" *ngIf="duenoActual.direccion">
+    <i class="bi bi-geo-alt me-1"></i>{{ duenoActual.direccion }}
+  </p>
+  <p class="mb-0 text-secondary" *ngIf="duenoActual.email || $any(duenoActual).correo">
+    <i class="bi bi-envelope me-1"></i>{{ duenoActual.email || $any(duenoActual).correo }}
+  </p>
+</div>
+
+            <ng-template #sinDueno>
+              <div class="p-3 bg-light rounded-3 small text-muted text-center border">
+                Propietario no vinculado o ID no registrado (ID: {{ mascotaActual.duenoId || 'Sin ID' }})
+              </div>
+            </ng-template>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTRO CLÍNICO DE VISITAS Y RECETA MÉDICA -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold m-0 text-dark">
+              <i class="bi bi-clock-history me-2 text-primary"></i>Registro Clínico de Visitas
+            </h5>
+          </div>
+
+          <div class="card-body">
+            <div *ngIf="citasMascota.length === 0" class="alert alert-light text-center py-4">
+              <i class="bi bi-calendar-x fs-2 text-muted d-block mb-2"></i>
+              <p class="text-muted m-0">No hay atenciones o citas registradas para este paciente.</p>
+            </div>
+
+            <!-- ACORDEÓN DE ATENCIONES -->
+            <div class="accordion" id="accordionHistorial" *ngIf="citasMascota.length > 0">
+              <div class="accordion-item border-0 mb-3 shadow-sm rounded-3 overflow-hidden" 
+                   *ngFor="let cita of citasMascota; let i = index">
+                
+                <h2 class="accordion-header" [id]="'heading' + i">
+                  <button 
+                    class="accordion-button fw-semibold" 
+                    [class.collapsed]="i !== 0"
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    [attr.data-bs-target]="'#collapse' + i">
+                    <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                      <div>
+                        <i class="bi bi-calendar2-check text-primary me-2"></i>
+                        <span>{{ cita.fechaHora | date:'medium' }}</span>
+                        <span class="ms-2 text-muted fw-normal small">— {{ cita.motivo }}</span>
+                      </div>
+                      <span [ngClass]="cita.estado | estadoCita">{{ cita.estado }}</span>
+                    </div>
+                  </button>
+                </h2>
+
+                <div [id]="'collapse' + i" 
+                     class="accordion-collapse collapse" 
+                     [class.show]="i === 0"
+                     [attr.data-bs-parent]="'#accordionHistorial'">
+                  
+                  <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                      
+                      <!-- DOCTOR ATENDIENTE -->
+                      <div class="col-md-6">
+                        <strong class="text-secondary small d-block">Doctor / Veterinario Tratante:</strong>
+                        <span class="fw-bold text-primary">
+                          👨‍⚕️ {{ obtenerNombreVeterinario(cita.veterinarioId) }}
+                        </span>
+                      </div>
+
+                      <div class="col-md-6">
+                        <strong class="text-secondary small d-block">Prioridad asignada:</strong>
+                        <span class="badge" [ngClass]="cita.prioridad === 'EMERGENCIA' ? 'bg-danger' : (cita.prioridad === 'URGENCIA' ? 'bg-warning text-dark' : 'bg-success')">
+                          {{ cita.prioridad }}
+                        </span>
+                      </div>
+
+                      <!-- DIAGNÓSTICO Y DETALLE DE ATENCIÓN -->
+                      <div class="col-12 col-md-6">
+                        <strong class="text-secondary small d-block mb-1">Detalle de Atención / Diagnóstico:</strong>
+                        <div class="bg-white p-3 rounded-2 border small text-dark" style="white-space: pre-line;">
+                          <strong>Diagnóstico:</strong> {{ cita.diagnostico || 'Evaluación general' }}
+                          <hr class="my-2">
+                          {{ cita.detalleAtencion || 'Atención completada con parámetros normales.' }}
+                        </div>
+                      </div>
+
+                      <!-- RECETA MÉDICA -->
+                      <div class="col-12 col-md-6">
+                        <strong class="text-secondary small d-block mb-1">Receta Médica / Prescripción:</strong>
+                        <div class="bg-white p-3 rounded-2 border small text-dark border-success" style="white-space: pre-line;">
+                          📋 <strong>Indicaciones:</strong>
+                          <br>
+                          {{ cita.receta || 'Sin prescripción de medicamentos.' }}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <ng-template #noSeleccion>
+    <div class="alert alert-info text-center py-5 rounded-4 shadow-sm">
+      <i class="bi bi-search fs-1 d-block mb-3"></i>
+      <h4>No hay mascotas registradas</h4>
+      <p class="text-muted">Ve al módulo de mascotas para dar de alta al primer paciente.</p>
+    </div>
+  </ng-template>
+</div>
